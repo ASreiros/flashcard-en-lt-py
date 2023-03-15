@@ -9,16 +9,19 @@ SHADOW_2 = "#332E33"
 SHADOW_3 = "#665C66"
 SHADOW_4 = "#807380"
 SHADOW_5 = "#998A99"
-TIME = 5
+TIME = 3
 FONT_NAME = "Ariel"
 LANGUAGE = "English"
 TRANSLATE = "Lietuvių"
 
+after_holder = ""
+
 
 def count_down(count):
 	if count > 0:
+		global after_holder
 		label_time.config(text=count, bg=CARD_COLOR)
-		window.after(1000, count_down, count - 1)
+		after_holder = window.after(1000, count_down, count - 1)
 	else:
 		show_answer()
 
@@ -28,7 +31,9 @@ def show_word():
 	canvas.itemconfig(card, fill=CARD_COLOR)
 	word = dictionary.get_word()
 	label_language.config(text=LANGUAGE, bg=CARD_COLOR, fg=ANSWER_COLOR)
-	label_warning.config(bg=CARD_COLOR, fg=ANSWER_COLOR, text=f"Correct answers: {dictionary.correct} / {dictionary.tries}")
+	label_warning.config(bg=CARD_COLOR, fg=ANSWER_COLOR, text=f"Correct answers: "
+															  f"{dictionary.correct} / {dictionary.tries}. "
+															  f"{len(dictionary.data)} words left")
 	if word != "|EXIT|":
 		label_word.config(text=word, bg=CARD_COLOR, fg=ANSWER_COLOR)
 		count_down(TIME)
@@ -43,7 +48,9 @@ def show_answer():
 	label_time.config(text="", bg=ANSWER_COLOR)
 	label_language.config(text=TRANSLATE, bg=ANSWER_COLOR, fg=CARD_COLOR)
 	label_word.config(text=dictionary.translate, bg=ANSWER_COLOR, fg=CARD_COLOR)
-	label_warning.config(bg=ANSWER_COLOR, fg=CARD_COLOR, text=f"Correct answers: {dictionary.correct} / {dictionary.tries}")
+	label_warning.config(bg=ANSWER_COLOR, fg=CARD_COLOR, text=f"Correct answers: "
+															  f"{dictionary.correct} / {dictionary.tries}. "
+															  f"{len(dictionary.data)} words left")
 
 
 def press_right():
@@ -59,6 +66,13 @@ def press_wrong():
 		show_word()
 	else:
 		label_warning.config(text="Wait until translation is shown")
+
+
+def press_new():
+	global after_holder
+	dictionary.new_list()
+	window.after_cancel(after_holder)
+	show_word()
 
 
 def round_rectangle(x1, y1, x2, y2, radius=25, **kwargs):
@@ -104,6 +118,9 @@ button_right.place(x=500, y=520)
 image_wrong = PhotoImage(file="images/wrong.png")
 button_wrong = Button(image=image_wrong, highlightthickness=0, bg=CARD_COLOR, command=press_wrong)
 button_wrong.place(x=100, y=520)
+
+button_new_list = Button(text="start new card pack", highlightthickness=0, bg=CARD_COLOR, fg="yellow", command=press_new)
+button_new_list.place(x=350, y=560, anchor="center")
 
 label_time = Label(text="", font=(FONT_NAME, 40, "italic"), fg="white", bg=CARD_COLOR)
 label_time.place(x=350, y=40, anchor="center")
